@@ -19,13 +19,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+#
+# Changelog:
+#   2009-10-20 Roland Tapken
+#     Added --style argument to change Qt look&feel
+#     Merged changes by AdamN from Githup-Repository at http://github.com/AdamN/python-webkit2png
+#     Added version information (%Y%m%d style)
 
 import sys
 import signal
 import os
 import logging
-LOG_FILENAME = 'webkit2png.log'
-logging.basicConfig(filename=LOG_FILENAME,level=logging.WARN,)
 import time
 
 from optparse import OptionParser
@@ -33,6 +37,10 @@ from optparse import OptionParser
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.QtWebKit import QWebPage
+
+VERSION="20091020"
+#LOG_FILENAME = 'webkit2png.log'
+#logging.basicConfig(filename=LOG_FILENAME,level=logging.WARN,)
 
 # Class for Website-Rendering. Uses QWebPage, which
 # requires a running QtGui to work.
@@ -75,6 +83,7 @@ class WebkitRenderer(QObject):
 
         # Set initial viewport (the size of the "window")
         size = self._page.mainFrame().contentsSize()
+        print size
         if width > 0:
             size.setWidth(width)
         if height > 0:
@@ -121,7 +130,7 @@ if __name__ == '__main__':
                 + "it under the terms of the GNU General Public License v2."
 
     parser = OptionParser(usage="usage: %prog [options] <URL>",
-                          version="%prog 0.1, Copyright (c) 2008 Roland Tapken",
+                          version="%prog " + VERSION + ", Copyright (c) Roland Tapken",
                           description=description)
     parser.add_option("-x", "--xvfb", action="store_true", dest="xvfb",
                       help="Start an 'xvfb' instance.", default=False)
@@ -137,6 +146,8 @@ if __name__ == '__main__':
                       help="One of 'ignore', 'keep', 'crop' or 'expand' [default: %default]")
     parser.add_option("-t", "--timeout", dest="timeout", default=0, type="int",
                       help="Time before the request will be canceled [default: %default]", metavar="SECONDS")
+    parser.add_option("", "--style", dest="style",
+                      help="Change the Qt look and feel to STYLE (e.G. 'windows').", metavar="STYLE")
     parser.add_option("-d", "--display", dest="display",
                       help="Connect to X server at DISPLAY.", metavar="DISPLAY")
     parser.add_option("--debug", action="store_true", dest="debug",
@@ -158,6 +169,11 @@ if __name__ == '__main__':
     if options.display:
         qtargs.append("-display")
         qtargs.append(options.display)
+
+    # Change the look and feel of Qt
+    if options.style:
+        qtargs.append("-style")
+        qtargs.append(options.style)
 
     if options.xvfb:
         # Start 'xvfb' instance by replacing the current process
@@ -220,3 +236,4 @@ if __name__ == '__main__':
     # Go to main loop (required)
     QTimer().singleShot(0, __on_exec)
     sys.exit(app.exec_())
+
