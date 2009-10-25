@@ -25,6 +25,10 @@
 #     Added --style argument to change Qt look&feel
 #     Merged changes by AdamN from Githup-Repository at http://github.com/AdamN/python-webkit2png
 #     Added version information (%Y%m%d style)
+#   2009-10-25 Roland Tapken
+#     Fixed issue reported at http://github.com/AdamN/python-webkit2png/issues#issue/2. The problem was
+#     that the constructor from superclass (QObject) has not been called.
+#     Added version output for debugging.
 
 import sys
 import signal
@@ -48,6 +52,7 @@ class WebkitRenderer(QObject):
 
     # Initializes the QWebPage object and registers some slots
     def __init__(self):
+        QObject.__init__(self)
         logging.debug("Initializing class %s", self.__class__.__name__)
         self._page = QWebPage()
         self.connect(self._page, SIGNAL("loadFinished(bool)"), self.__on_load_finished)
@@ -83,7 +88,7 @@ class WebkitRenderer(QObject):
 
         # Set initial viewport (the size of the "window")
         size = self._page.mainFrame().contentsSize()
-        print size
+        logging.debug("contentsSize: %s", size)
         if width > 0:
             size.setWidth(width)
         if height > 0:
@@ -190,6 +195,8 @@ if __name__ == '__main__':
         qfile = QFile()
         qfile.open(1, QIODevice.WriteOnly)
         options.output = qfile
+
+    logging.debug("Version %s, Pythion %s, Qt %s", VERSION, sys.version, qVersion());
 
     # Initialize Qt-Application, but make this script
     # abortable via CTRL-C
