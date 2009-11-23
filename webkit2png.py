@@ -40,7 +40,7 @@ from optparse import OptionParser
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-from PyQt4.QtWebKit import QWebPage
+from PyQt4.QtWebKit import *
 
 VERSION="20091020"
 #LOG_FILENAME = 'webkit2png.log'
@@ -55,6 +55,7 @@ class WebkitRenderer(QObject):
         QObject.__init__(self)
         logging.debug("Initializing class %s", self.__class__.__name__)
         self._page = QWebPage()
+        self._page.settings().setAttribute(QWebSettings.PluginsEnabled, True)
         self.connect(self._page, SIGNAL("loadFinished(bool)"), self.__on_load_finished)
         self.connect(self._page, SIGNAL("loadStarted()"), self.__on_load_started)
         self.connect(self._page.networkAccessManager(), SIGNAL("sslErrors(QNetworkReply *,const QList<QSslError>&)"), self.__on_ssl_errors)
