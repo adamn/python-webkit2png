@@ -229,7 +229,7 @@ if __name__ == '__main__':
                     ratio = Qt.KeepAspectRatioByExpanding
                 else:
                     ratio = Qt.IgnoreAspectRatio
-                image = image.scaledToWidth(options.scale[0], 1)
+                image = image.scaledToWidth(options.scale[0], Qt.SmoothTransformation)
                 if options.ratio == 'crop':
                     image = image.copy(0, 0, options.scale[0], options.scale[1])
 
