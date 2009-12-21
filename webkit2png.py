@@ -183,7 +183,7 @@ if __name__ == '__main__':
 
     if options.xvfb:
         # Start 'xvfb' instance by replacing the current process
-        newArgs = ["xvfb-run", "--server-args=-screen 0, 640x480x24", sys.argv[0]]
+        newArgs = ["xvfb-run", "-a", "--server-args=-screen 0, 640x480x24", sys.argv[0]]
         for i in range(1, len(sys.argv)):
             if sys.argv[i] not in ["-x", "--xvfb"]:
                 newArgs.append(sys.argv[i])
