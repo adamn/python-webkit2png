@@ -409,8 +409,10 @@ if __name__ == '__main__':
 
     if options.xvfb:
         # Start 'xvfb' instance by replacing the current process
-        newArgs = ["xvfb-run", "--auto-servernum", "--server-args=-screen 0, %dx%dx24" % options.xvfb, sys.argv[0]]
-        skipArgs = 0
+	# Create a server, starting first at 10 and going up to 99.
+	# If xvfb-run hits 99 (i.e. 89 open xvfb instances), it will fail
+        newArgs = ["xvfb-run", "--auto-servernum", "--server-num=10", "--server-args=-screen 0, %dx%dx24" % options.xvfb, sys.argv[0]]
+	skipArgs = 0
         for i in range(1, len(sys.argv)):
             if skipArgs > 0:
                 skipArgs -= 1
@@ -419,7 +421,9 @@ if __name__ == '__main__':
             else:
                 newArgs.append(sys.argv[i])
         logger.debug("Executing %s" % " ".join(newArgs))
-        subprocess.call(newArgs)
+	import pdb; pdb.set_trace();
+	os.execvp(newArgs[0],newArgs[1:])
+        
 
     # Prepare outout ("1" means STDOUT)
     if options.output == None:
