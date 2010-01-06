@@ -420,7 +420,6 @@ if __name__ == '__main__':
                 newArgs.append(sys.argv[i])
         logger.debug("Executing %s" % " ".join(newArgs))
         subprocess.call(newArgs)
-        raise RuntimeError("Failed to execute '%s'" % newArgs[0])
 
     # Prepare outout ("1" means STDOUT)
     if options.output == None:
