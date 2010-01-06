@@ -27,6 +27,7 @@
 import sys
 import signal
 import os
+import subprocess
 import logging
 import time
 
@@ -408,7 +409,7 @@ if __name__ == '__main__':
 
     if options.xvfb:
         # Start 'xvfb' instance by replacing the current process
-        newArgs = ["xvfb-run", "--auto-servernum --server-args=-screen 0, %dx%dx24" % options.xvfb, sys.argv[0]]
+        newArgs = ["xvfb-run", "--auto-servernum", "--server-args=-screen 0, %dx%dx24" % options.xvfb, sys.argv[0]]
         skipArgs = 0
         for i in range(1, len(sys.argv)):
             if skipArgs > 0:
@@ -418,7 +419,7 @@ if __name__ == '__main__':
             else:
                 newArgs.append(sys.argv[i])
         logger.debug("Executing %s" % " ".join(newArgs))
-        os.execvp(newArgs[0], newArgs)
+        subprocess.call(newArgs)
         raise RuntimeError("Failed to execute '%s'" % newArgs[0])
 
     # Prepare outout ("1" means STDOUT)
@@ -427,7 +428,7 @@ if __name__ == '__main__':
     else:
         options.output = open(options.output, "w")
 
-    logger.debug("Version %s, Pythion %s, Qt %s", VERSION, sys.version, qVersion());
+    logger.debug("Version %s, Python %s, Qt %s", VERSION, sys.version, qVersion());
 
     # Technically, this is a QtGui application, because QWebPage requires it
     # to be. But because we will have no user interaction, and rendering can
