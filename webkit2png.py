@@ -27,7 +27,6 @@
 import sys
 import signal
 import os
-import subprocess
 import logging
 import time
 
@@ -416,8 +415,8 @@ if __name__ == '__main__':
             else:
                 newArgs.append(sys.argv[i])
         logger.debug("Executing %s" % " ".join(newArgs))
-        subprocess.call(newArgs)
-
+	os.execvp(newArgs[0],newArgs[1:])
+        
     # Prepare outout ("1" means STDOUT)
     if options.output == None:
         options.output = sys.stdout
