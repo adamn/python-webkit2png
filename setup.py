@@ -16,7 +16,6 @@ setup(
     author_email = 'roland at dau-sicher de',
     packages = find_packages(),
     package_dir = {'webkit2png': 'webkit2png'},
-    install_requires = ['pyqt'],
     entry_points="""
     [console_scripts]
     ghi = github.issues:main
