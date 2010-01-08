@@ -1,14 +1,9 @@
-import os
 from setuptools import setup, find_packages
 
 version = '0.8.1'
 
 description = "Takes snapshot of webpages using Webkit and Qt4"
-cur_dir = os.path.dirname(__file__)
-try:
-    long_description = open(os.path.join(cur_dir, 'README.rst')).read()
-except:
-    long_description = description
+long_description = description
 
 setup(
     name = "webkit2png",
@@ -19,8 +14,8 @@ setup(
     long_description = long_description,
     author = 'Roland Tapken',
     author_email = 'roland at dau-sicher de',
-    packages = find_packages('src'),
-    package_dir = {'': 'src'},
+    packages = find_packages(),
+    package_dir = {'webkit2png': 'webkit2png'},
     install_requires = ['pyqt4'],
     entry_points="""
     [console_scripts]
