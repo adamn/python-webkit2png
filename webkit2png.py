@@ -54,16 +54,16 @@ class WebkitRenderer(QObject):
     An example on how to use this is the __qt_main() method at the end
     of the libraries source file. More generic examples:
 
-        def qt_main():
-            while go_on():
-                do_something_meaningful()
-                while QApplication.hasPendingEvents():
-                     QApplication.processEvents()
-            QApplication.quit()
-   
-        app = init_qtgui()
-        QTimer.singleShot(0, qt_main)
-        sys.exit(app.exec_())
+def qt_main():
+    while go_on():
+        do_something_meaningful()
+        while QApplication.hasPendingEvents():
+             QApplication.processEvents()
+    QApplication.quit()
+
+app = init_qtgui()
+QTimer.singleShot(0, qt_main)
+sys.exit(app.exec_())
 
     Or let Qt handle event processing using a QTimer instance:
 
@@ -131,7 +131,7 @@ class WebkitRenderer(QObject):
         # We have to use this helper object because
         # QApplication.processEvents may be called, causing
         # this method to get called while it has not returned yet.
-        helper = _WebkitRendererHelper(self)
+	helper = _WebkitRendererHelper(self)
         image = helper.render(url)
 
         # Bind helper instance to this image to prevent the
@@ -145,8 +145,7 @@ class WebkitRenderer(QObject):
         """Renders the image into a File resource.
         Returns the size of the data that has been written.
         """
-
-        format = self.format # this may not be constant due to processEvents()
+	format = self.format # this may not be constant due to processEvents()
         image = self.render(url)
         qBuffer = QBuffer()
         image.save(qBuffer, format)
@@ -215,8 +214,7 @@ class _WebkitRendererHelper(QObject):
         on the value of 'grabWholeWindow' is drawn into a QPixmap
         and postprocessed (_post_process_image).
         """
-        self._load_page(url, self.width, self.height, self.timeout)
-
+	self._load_page(url, self.width, self.height, self.timeout)
         # Wait for end of timer. In this time, process
         # other outstanding Qt events.
         if self.wait > 0:
@@ -254,10 +252,9 @@ class _WebkitRendererHelper(QObject):
         # This is an event-based application. So we have to wait until
         # "loadFinished(bool)" raised.
         cancelAt = time.time() + timeout
-
         self.__loading = True
         self.__loadingResult = False # Default
-        self._page.mainFrame().load(QUrl(url))
+	self._page.mainFrame().load(QUrl.fromEncoded(url))
         while self.__loading:
             if timeout > 0 and time.time() >= cancelAt:
                 raise RuntimeError("Request timed out")
@@ -409,10 +406,8 @@ if __name__ == '__main__':
 
     if options.xvfb:
         # Start 'xvfb' instance by replacing the current process
-	# Create a server, starting first at 10 and going up to 99.
-	# If xvfb-run hits 99 (i.e. 89 open xvfb instances), it will fail
-        newArgs = ["xvfb-run", "--auto-servernum", "--server-num=10", "--server-args=-screen 0, %dx%dx24" % options.xvfb, sys.argv[0]]
-	skipArgs = 0
+        newArgs = ["xvfb-run", "--auto-servernum", "--server-args=-screen 0, %dx%dx24" % options.xvfb, sys.argv[0]]
+        skipArgs = 0
         for i in range(1, len(sys.argv)):
             if skipArgs > 0:
                 skipArgs -= 1
@@ -421,9 +416,7 @@ if __name__ == '__main__':
             else:
                 newArgs.append(sys.argv[i])
         logger.debug("Executing %s" % " ".join(newArgs))
-	import pdb; pdb.set_trace();
-	os.execvp(newArgs[0],newArgs[1:])
-        
+        subprocess.call(newArgs)
 
     # Prepare outout ("1" means STDOUT)
     if options.output == None:
