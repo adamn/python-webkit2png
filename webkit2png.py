@@ -321,7 +321,8 @@ class _WebkitRendererHelper(QObject):
 def init_qtgui(display=None, style=None, qtargs=[]):
     """Initiates the QApplication environment using the given args."""
     if QApplication.instance():
-        logger.warn("QApplication has already been instantiated. Ignoring request (and given arguments).")
+        logger.debug("QApplication has already been instantiated. \
+                        Ignoring given arguments and returning existing QApplication.")
         return QApplication.instance()
     
     qtargs2 = [sys.argv[0]]
