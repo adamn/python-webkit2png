@@ -97,7 +97,7 @@ sys.exit(app.exec_())
       JavascriptCanOpenWindows: False
     """
 
-    def __init__(self):
+    def __init__(self,**kwargs):
         """Sets default values for the properties."""
 
         if not QApplication.instance():
@@ -105,16 +105,18 @@ sys.exit(app.exec_())
         QObject.__init__(self)
 
         # Initialize default properties
-        self.width = 0
-        self.height = 0
-        self.timeout = 0
-        self.wait = 0
-        self.scaleToWidth = 0
-        self.scaleToHeight = 0
-        self.scaleRatio = 'keep'
-        self.grabWholeWindow = False # Set this to true if you want to capture flash.
-                                     # Not that your desktop must be large enough for
-                                     # fitting the whole window.
+        self.width = kwargs.get('width', 0)
+        self.height = kwargs.get('height', 0)
+        self.timeout = kwargs.get('timeout', 0)
+        self.wait = kwargs.get('wait', 0)
+        self.scaleToWidth = kwargs.get('scaleToWidth', 0)
+        self.scaleToHeight = kwargs.get('scaleToHeight', 0)
+        self.scaleRatio = kwargs.get('scaleRatio', 'keep')
+        # Set this to true if you want to capture flash.
+        # Not that your desktop must be large enough for
+        # fitting the whole window.
+        self.grabWholeWindow = kwargs.get('grabWholeWindow', False) 
+
         
         # Set some default options for QWebPage
         self.qWebSettings = {
