@@ -258,7 +258,7 @@ class _WebkitRendererHelper(QObject):
 	self._page.mainFrame().load(QUrl.fromEncoded(url))
         while self.__loading:
             if timeout > 0 and time.time() >= cancelAt:
-                raise RuntimeError("Request timed out")
+                raise RuntimeError("Request timed out on %s" % url)
             while QApplication.hasPendingEvents():
                 QCoreApplication.processEvents()
 
