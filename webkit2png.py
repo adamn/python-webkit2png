@@ -261,7 +261,7 @@ class _WebkitRendererHelper(QObject):
         # TODO: fromEncoded() needs to be used in some situations.  Some
         # sort of flag should be passed in to WebkitRenderer maybe?
         #self._page.mainFrame().load(QUrl.fromEncoded(url))
-        self._page.mainFrame().load(QUrl(url))
+        self._page.mainFrame().load(QUrl(url,1))
         while self.__loading:
             if timeout > 0 and time.time() >= cancelAt:
                 raise RuntimeError("Request timed out on %s" % url)
