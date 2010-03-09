@@ -132,7 +132,7 @@ sys.exit(app.exec_())
         # We have to use this helper object because
         # QApplication.processEvents may be called, causing
         # this method to get called while it has not returned yet.
-	helper = _WebkitRendererHelper(self)
+    helper = _WebkitRendererHelper(self)
         image = helper.render(url)
 
         # Bind helper instance to this image to prevent the
@@ -146,7 +146,7 @@ sys.exit(app.exec_())
         """Renders the image into a File resource.
         Returns the size of the data that has been written.
         """
-	format = self.format # this may not be constant due to processEvents()
+    format = self.format # this may not be constant due to processEvents()
         image = self.render(url)
         qBuffer = QBuffer()
         image.save(qBuffer, format)
@@ -215,7 +215,7 @@ class _WebkitRendererHelper(QObject):
         on the value of 'grabWholeWindow' is drawn into a QPixmap
         and postprocessed (_post_process_image).
         """
-	self._load_page(url, self.width, self.height, self.timeout)
+    self._load_page(url, self.width, self.height, self.timeout)
         # Wait for end of timer. In this time, process
         # other outstanding Qt events.
         if self.wait > 0:
@@ -248,14 +248,20 @@ class _WebkitRendererHelper(QObject):
         return self._post_process_image(image)
 
     def _load_page(self, url, width, height, timeout):
-        """This method implements the logic for retrieving and displaying the requested page."""
+        """
+        This method implements the logic for retrieving and displaying 
+        the requested page.
+        """
 
         # This is an event-based application. So we have to wait until
         # "loadFinished(bool)" raised.
         cancelAt = time.time() + timeout
         self.__loading = True
         self.__loadingResult = False # Default
-	self._page.mainFrame().load(QUrl.fromEncoded(url))
+        # TODO: fromEncoded() needs to be used in some situations.  Some
+        # sort of flag should be passed in to WebkitRenderer maybe?
+        #self._page.mainFrame().load(QUrl.fromEncoded(url))
+        self._page.mainFrame().load(QUrl(url))
         while self.__loading:
             if timeout > 0 and time.time() >= cancelAt:
                 raise RuntimeError("Request timed out on %s" % url)
@@ -418,7 +424,7 @@ if __name__ == '__main__':
             else:
                 newArgs.append(sys.argv[i])
         logger.debug("Executing %s" % " ".join(newArgs))
-	os.execvp(newArgs[0],newArgs[1:])
+    os.execvp(newArgs[0],newArgs[1:])
         
     # Prepare outout ("1" means STDOUT)
     if options.output == None:
