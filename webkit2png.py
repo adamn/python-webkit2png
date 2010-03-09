@@ -215,7 +215,7 @@ class _WebkitRendererHelper(QObject):
         on the value of 'grabWholeWindow' is drawn into a QPixmap
         and postprocessed (_post_process_image).
         """
-    self._load_page(url, self.width, self.height, self.timeout)
+        self._load_page(url, self.width, self.height, self.timeout)
         # Wait for end of timer. In this time, process
         # other outstanding Qt events.
         if self.wait > 0:
