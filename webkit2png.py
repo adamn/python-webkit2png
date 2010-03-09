@@ -132,7 +132,7 @@ sys.exit(app.exec_())
         # We have to use this helper object because
         # QApplication.processEvents may be called, causing
         # this method to get called while it has not returned yet.
-    helper = _WebkitRendererHelper(self)
+        helper = _WebkitRendererHelper(self)
         image = helper.render(url)
 
         # Bind helper instance to this image to prevent the
@@ -146,7 +146,7 @@ sys.exit(app.exec_())
         """Renders the image into a File resource.
         Returns the size of the data that has been written.
         """
-    format = self.format # this may not be constant due to processEvents()
+        format = self.format # this may not be constant due to processEvents()
         image = self.render(url)
         qBuffer = QBuffer()
         image.save(qBuffer, format)
@@ -347,11 +347,6 @@ def init_qtgui(display=None, style=None, qtargs=[]):
     qtargs2.extend(qtargs)
     
     return QApplication(qtargs2)
-
-
-
-
-
 
 
 if __name__ == '__main__':
