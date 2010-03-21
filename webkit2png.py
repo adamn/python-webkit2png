@@ -419,7 +419,7 @@ if __name__ == '__main__':
             else:
                 newArgs.append(sys.argv[i])
         logger.debug("Executing %s" % " ".join(newArgs))
-    os.execvp(newArgs[0],newArgs[1:])
+        os.execvp(newArgs[0],newArgs[1:])
         
     # Prepare outout ("1" means STDOUT)
     if options.output == None:
