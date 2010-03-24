@@ -175,7 +175,8 @@ class _WebkitRendererHelper(QObject):
         QObject.__init__(self)
 
         # Copy properties from parent
-        self.__dict__.update(parent.__dict__)
+        for key,value in parent.__dict__.items():
+            setattr(self,key,value)
 
         # Create and connect required PyQt4 objects
         self._page = QWebPage()
@@ -261,7 +262,7 @@ class _WebkitRendererHelper(QObject):
         # TODO: fromEncoded() needs to be used in some situations.  Some
         # sort of flag should be passed in to WebkitRenderer maybe?
         #self._page.mainFrame().load(QUrl.fromEncoded(url))
-        self._page.mainFrame().load(QUrl(url,1))
+        self._page.mainFrame().load(QUrl(url))
         while self.__loading:
             if timeout > 0 and time.time() >= cancelAt:
                 raise RuntimeError("Request timed out on %s" % url)
