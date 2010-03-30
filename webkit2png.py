@@ -29,12 +29,14 @@ import signal
 import os
 import logging
 import time
+import urlparse
 
 from optparse import OptionParser
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.QtWebKit import *
+from PyQt4.QtNetwork import *
 
 VERSION="20091224"
 logger = logging.getLogger('webkit2png');
@@ -352,6 +354,11 @@ def init_qtgui(display=None, style=None, qtargs=[]):
 
 if __name__ == '__main__':
     # This code will be executed if this module is run 'as-is'.
+
+    # Enable HTTP proxy
+    proxy_url = urlparse.urlparse(os.environ.get('http_proxy'))
+    proxy = QNetworkProxy(QNetworkProxy.HttpProxy, proxy_url.hostname, proxy_url.port)
+    QNetworkProxy.setApplicationProxy(proxy)
 
     LOG_FILENAME = 'webkit2png.log'
     logging.basicConfig(filename=LOG_FILENAME,level=logging.WARN,)
