@@ -356,9 +356,10 @@ if __name__ == '__main__':
     # This code will be executed if this module is run 'as-is'.
 
     # Enable HTTP proxy
-    proxy_url = urlparse.urlparse(os.environ.get('http_proxy'))
-    proxy = QNetworkProxy(QNetworkProxy.HttpProxy, proxy_url.hostname, proxy_url.port)
-    QNetworkProxy.setApplicationProxy(proxy)
+    if http_proxy in os.environ:
+        proxy_url = urlparse.urlparse(os.environ.get('http_proxy'))
+        proxy = QNetworkProxy(QNetworkProxy.HttpProxy, proxy_url.hostname, proxy_url.port)
+        QNetworkProxy.setApplicationProxy(proxy)
 
     LOG_FILENAME = 'webkit2png.log'
     logging.basicConfig(filename=LOG_FILENAME,level=logging.WARN,)
