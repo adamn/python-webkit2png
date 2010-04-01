@@ -200,6 +200,7 @@ class _WebkitRendererHelper(QObject):
         # The way we will use this, it seems to be unesseccary to have Scrollbars enabled
         self._page.mainFrame().setScrollBarPolicy(Qt.Horizontal, Qt.ScrollBarAlwaysOff)
         self._page.mainFrame().setScrollBarPolicy(Qt.Vertical, Qt.ScrollBarAlwaysOff)
+        self._page.settings().setUserStyleSheetUrl(QUrl("data:text/css,html,body{overflow-y:hidden !important;}"))
 
         # Show this widget
         self._window.show()
