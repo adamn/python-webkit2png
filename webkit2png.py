@@ -421,7 +421,8 @@ if __name__ == '__main__':
 
     if options.xvfb:
         # Start 'xvfb' instance by replacing the current process
-        newArgs = ["xvfb-run", "--auto-servernum", "--server-args=-screen 0, %dx%dx24" % options.xvfb, sys.argv[0]]
+        server_num = int(os.getpid() + 1e6)
+        newArgs = ["xvfb-run", "--auto-servernum", "--server-num", str(server_num), "--server-args=-screen 0, %dx%dx24" % options.xvfb, sys.argv[0]]
         skipArgs = 0
         for i in range(1, len(sys.argv)):
             if skipArgs > 0:
