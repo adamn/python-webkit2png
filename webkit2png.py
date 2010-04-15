@@ -274,8 +274,7 @@ class _WebkitRendererHelper(QObject):
         logger.debug("Processing result")
 
         if self.__loading_result == False:
-            #raise RuntimeError("Failed to load %s" % url)
-            logger.debug("Failed to load %s" % url)
+            logger.warning("Failed to load %s" % url)
 
         # Set initial viewport (the size of the "window")
         size = self._page.mainFrame().contentsSize()
