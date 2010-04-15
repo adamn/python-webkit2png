@@ -274,7 +274,8 @@ class _WebkitRendererHelper(QObject):
         logger.debug("Processing result")
 
         if self.__loading_result == False:
-            raise RuntimeError("Failed to load %s" % url)
+            #raise RuntimeError("Failed to load %s" % url)
+            logger.debug("Failed to load %s" % url)
 
         # Set initial viewport (the size of the "window")
         size = self._page.mainFrame().contentsSize()
@@ -356,7 +357,7 @@ if __name__ == '__main__':
     # This code will be executed if this module is run 'as-is'.
 
     # Enable HTTP proxy
-    if http_proxy in os.environ:
+    if 'http_proxy' in os.environ:
         proxy_url = urlparse.urlparse(os.environ.get('http_proxy'))
         proxy = QNetworkProxy(QNetworkProxy.HttpProxy, proxy_url.hostname, proxy_url.port)
         QNetworkProxy.setApplicationProxy(proxy)
@@ -414,7 +415,7 @@ if __name__ == '__main__':
 
     # Enable output of debugging information
     if options.debug:
-        logger.basicConfig(level=logger.DEBUG)
+        logger.setLevel(logging.DEBUG)
 
     if options.xvfb:
         # Start 'xvfb' instance by replacing the current process
