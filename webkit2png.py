@@ -39,6 +39,7 @@ from PyQt4.QtWebKit import *
 from PyQt4.QtNetwork import *
 
 VERSION="20091224"
+LOG_FILENAME = 'webkit2png.log'
 logger = logging.getLogger('webkit2png');
 
 # Class for Website-Rendering. Uses QWebPage, which
@@ -360,9 +361,6 @@ if __name__ == '__main__':
         proxy_url = urlparse.urlparse(os.environ.get('http_proxy'))
         proxy = QNetworkProxy(QNetworkProxy.HttpProxy, proxy_url.hostname, proxy_url.port)
         QNetworkProxy.setApplicationProxy(proxy)
-
-    LOG_FILENAME = 'webkit2png.log'
-    logging.basicConfig(filename=LOG_FILENAME,level=logging.WARN,)
     
     # Parse command line arguments.
     # Syntax:
@@ -403,7 +401,9 @@ if __name__ == '__main__':
                       help="Connect to X server at DISPLAY.", metavar="DISPLAY")
     parser.add_option("--debug", action="store_true", dest="debug",
                       help="Show debugging information.", default=False)
-    
+    parser.add_option("--log", action="store", dest="logfile", default=LOG_FILENAME,
+                      help="Select the log output file",)
+
     # Parse command line arguments and validate them (as far as we can)
     (options,args) = parser.parse_args()
     if len(args) != 1:
@@ -411,6 +411,8 @@ if __name__ == '__main__':
     if options.display and options.xvfb:
         parser.error("options -x and -d are mutually exclusive")
     options.url = args[0]
+
+    logging.basicConfig(filename=options.logfile,level=logging.WARN,)
 
     # Enable output of debugging information
     if options.debug:
