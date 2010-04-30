@@ -200,6 +200,7 @@ class _WebkitRendererHelper(QObject):
         # The way we will use this, it seems to be unesseccary to have Scrollbars enabled
         self._page.mainFrame().setScrollBarPolicy(Qt.Horizontal, Qt.ScrollBarAlwaysOff)
         self._page.mainFrame().setScrollBarPolicy(Qt.Vertical, Qt.ScrollBarAlwaysOff)
+        self._page.settings().setUserStyleSheetUrl(QUrl("data:text/css,html,body{overflow-y:hidden !important;}"))
 
         # Show this widget
         self._window.show()
@@ -420,7 +421,8 @@ if __name__ == '__main__':
 
     if options.xvfb:
         # Start 'xvfb' instance by replacing the current process
-        newArgs = ["xvfb-run", "--auto-servernum", "--server-args=-screen 0, %dx%dx24" % options.xvfb, sys.argv[0]]
+        server_num = int(os.getpid() + 1e6)
+        newArgs = ["xvfb-run", "--auto-servernum", "--server-num", str(server_num), "--server-args=-screen 0, %dx%dx24" % options.xvfb, sys.argv[0]]
         skipArgs = 0
         for i in range(1, len(sys.argv)):
             if skipArgs > 0:
