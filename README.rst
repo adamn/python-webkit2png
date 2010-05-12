@@ -5,3 +5,6 @@ http://www.blogs.uni-osnabrueck.de/rotapken/2008/12/03/create-screenshots-of-a-w
 On ubuntu you need to add following packages:
 apt-get install python-qt4 libqt4-webkit 
 
+---
+And then install it with:
+pip install webkit2png

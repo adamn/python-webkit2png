@@ -1,0 +1,20 @@
+Metadata-Version: 1.0
+Name: webkit2png
+Version: 0.8.2
+Summary: Takes snapshot of webpages using Webkit and Qt4
+Home-page: http://github.com/AdamN/python-webkit2png
+Author: Roland Tapken
+Author-email: roland at dau-sicher de
+License: LGPL
+Description: Takes snapshot of webpages using Webkit and Qt4
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: GNU General Public License (GPL)
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: POSIX
+Classifier: Programming Language :: Python
+Classifier: Topic :: Software Development :: Bug Tracking
+Classifier: Topic :: Multimedia :: Graphics :: Capture :: Screen Capture
+Classifier: Topic :: Utilities

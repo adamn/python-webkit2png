@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '0.8.1'
+version = '0.8.2'
 
 description = "Takes snapshot of webpages using Webkit and Qt4"
 long_description = description
@@ -17,7 +17,7 @@ setup(
     packages = find_packages(),
     package_dir = {'webkit2png': 'webkit2png'},
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU General Public License (GPL)',
