@@ -119,7 +119,7 @@ sys.exit(app.exec_())
         # Not that your desktop must be large enough for
         # fitting the whole window.
         self.grabWholeWindow = kwargs.get('grabWholeWindow', False) 
-
+        self.renderTransparentBackground = kwargs.get('renderTransparentBackground', False)
         
         # Set some default options for QWebPage
         self.qWebSettings = {
@@ -234,21 +234,32 @@ class _WebkitRendererHelper(QObject):
         #self._window.repaint()
         while QApplication.hasPendingEvents():
             QApplication.processEvents()
-        
-        if self.grabWholeWindow:
-            # Note that this does not fully ensure that the
-            # window still has the focus when the screen is
-            # grabbed. This might result in a race condition.
-            self._view.activateWindow()
-            image = QPixmap.grabWindow(self._window.winId())
-        else:
-            image = QPixmap.grabWidget(self._window)
 
-        ## Another possible drawing solution
-        #image = QImage(self._page.viewportSize(), QImage.Format_ARGB32)
-        #painter = QPainter(image)
-        #self._page.mainFrame().render(painter)
-        #painter.end()
+        if self.renderTransparentBackground:
+            # Another possible drawing solution
+            image = QImage(self._page.viewportSize(), QImage.Format_ARGB32)
+            image.fill(QColor(255,0,0,0).rgba())
+
+            # http://ariya.blogspot.com/2009/04/transparent-qwebview-and-qwebpage.html
+            palette = self._view.palette()
+            palette.setBrush(QPalette.Base, Qt.transparent)
+            self._page.setPalette(palette)
+            self._view.setAttribute(Qt.WA_OpaquePaintEvent, False)
+
+            painter = QPainter(image)
+            painter.setBackgroundMode(Qt.TransparentMode)
+            self._page.mainFrame().render(painter)
+            painter.end()
+        else:
+            if self.grabWholeWindow:
+                # Note that this does not fully ensure that the
+                # window still has the focus when the screen is
+                # grabbed. This might result in a race condition.
+                self._view.activateWindow()
+                image = QPixmap.grabWindow(self._window.winId())
+            else:
+                image = QPixmap.grabWidget(self._window)
+        
 
         return self._post_process_image(image)
 
@@ -396,6 +407,8 @@ if __name__ == '__main__':
                       help="Time before the request will be canceled [default: %default]", metavar="SECONDS")
     parser.add_option("-W", "--window", dest="window", action="store_true",
                       help="Grab whole window instead of frame (may be required for plugins)", default=False)
+    parser.add_option("-T", "--transparent", dest="transparent", action="store_true",
+                      help="Render output on a transparent background (Be sure to have a transparent background defined in the html)", default=False)
     parser.add_option("", "--style", dest="style",
                       help="Change the Qt look and feel to STYLE (e.G. 'windows').", metavar="STYLE")
     parser.add_option("-d", "--display", dest="display",
@@ -459,6 +472,7 @@ if __name__ == '__main__':
             renderer.wait = options.wait
             renderer.format = options.format
             renderer.grabWholeWindow = options.window
+            renderer.renderTransparentBackground = options.transparent
 
             if options.scale:
                 renderer.scaleRatio = options.ratio
