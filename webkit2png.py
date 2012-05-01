@@ -115,6 +115,7 @@ sys.exit(app.exec_())
         self.scaleToWidth = kwargs.get('scaleToWidth', 0)
         self.scaleToHeight = kwargs.get('scaleToHeight', 0)
         self.scaleRatio = kwargs.get('scaleRatio', 'keep')
+        self.format = kwargs.get('format', 'png')
         # Set this to true if you want to capture flash.
         # Not that your desktop must be large enough for
         # fitting the whole window.
