@@ -146,7 +146,7 @@ sys.exit(app.exec_())
 
         return image
 
-    def render_to_file(self, url, file):
+    def render_to_file(self, url, file_object):
         """Renders the image into a File resource.
         Returns the size of the data that has been written.
         """
@@ -154,7 +154,7 @@ sys.exit(app.exec_())
         image = self.render(url)
         qBuffer = QBuffer()
         image.save(qBuffer, format)
-        file.write(qBuffer.buffer().data())
+        file_object.write(qBuffer.buffer().data())
         return qBuffer.size()
 
     def render_to_bytes(self, url):
@@ -486,7 +486,7 @@ if __name__ == '__main__':
                 if "plugins" in options.features:
                     renderer.qWebSettings[QWebSettings.PluginsEnabled] = True
 
-            renderer.render_to_file(url=options.url, file=options.output)
+            renderer.render_to_file(url=options.url, file_object=options.output)
             options.output.close()
             QApplication.exit(0)
         except RuntimeError, e:
