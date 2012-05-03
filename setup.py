@@ -14,8 +14,8 @@ setup(
     long_description = long_description,
     author = 'Roland Tapken',
     author_email = 'roland at dau-sicher de',
-    packages = find_packages(),
-    package_dir = {'webkit2png': 'webkit2png'},
+    packages = ['webkit2png'],
+    package_dir = [],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
@@ -28,5 +28,6 @@ setup(
         'Topic :: Multimedia :: Graphics :: Capture :: Screen Capture',
         'Topic :: Utilities'
     ],
+    scripts = ['scripts/webkit2png'],
 )
 

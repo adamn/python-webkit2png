@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # webkit2png.py
 #
@@ -24,23 +23,12 @@
 #  - Add QTcpSocket support to create a "screenshot daemon" that
 #    can handle multiple requests at the same time.
 
-import sys
-import signal
-import os
-import logging
 import time
-import urlparse
-
-from optparse import OptionParser
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.QtWebKit import *
 from PyQt4.QtNetwork import *
-
-VERSION="20091224"
-LOG_FILENAME = 'webkit2png.log'
-logger = logging.getLogger('webkit2png');
 
 # Class for Website-Rendering. Uses QWebPage, which
 # requires a running QtGui to work.
@@ -115,6 +103,8 @@ sys.exit(app.exec_())
         self.scaleToWidth = kwargs.get('scaleToWidth', 0)
         self.scaleToHeight = kwargs.get('scaleToHeight', 0)
         self.scaleRatio = kwargs.get('scaleRatio', 'keep')
+        self.format = kwargs.get('format', 'png')
+        self.logger = kwargs.get('logger', None)
         # Set this to true if you want to capture flash.
         # Not that your desktop must be large enough for
         # fitting the whole window.
@@ -145,7 +135,7 @@ sys.exit(app.exec_())
 
         return image
 
-    def render_to_file(self, url, file):
+    def render_to_file(self, url, file_object):
         """Renders the image into a File resource.
         Returns the size of the data that has been written.
         """
@@ -153,7 +143,7 @@ sys.exit(app.exec_())
         image = self.render(url)
         qBuffer = QBuffer()
         image.save(qBuffer, format)
-        file.write(qBuffer.buffer().data())
+        file_object.write(qBuffer.buffer().data())
         return qBuffer.size()
 
     def render_to_bytes(self, url):
@@ -225,7 +215,7 @@ class _WebkitRendererHelper(QObject):
         # Wait for end of timer. In this time, process
         # other outstanding Qt events.
         if self.wait > 0:
-            logger.debug("Waiting %d seconds " % self.wait)
+            if self.logger: self.logger.debug("Waiting %d seconds " % self.wait)
             waitToTime = time.time() + self.wait
             while time.time() < waitToTime:
                 while QApplication.hasPendingEvents():
@@ -285,14 +275,14 @@ class _WebkitRendererHelper(QObject):
             while QApplication.hasPendingEvents():
                 QCoreApplication.processEvents()
 
-        logger.debug("Processing result")
+        if self.logger: self.logger.debug("Processing result")
 
         if self.__loading_result == False:
-            logger.warning("Failed to load %s" % url)
+            if self.logger: self.logger.warning("Failed to load %s" % url)
 
         # Set initial viewport (the size of the "window")
         size = self._page.mainFrame().contentsSize()
-        logger.debug("contentsSize: %s", size)
+        if self.logger: self.logger.debug("contentsSize: %s", size)
         if width > 0:
             size.setWidth(width)
         if height > 0:
@@ -325,7 +315,7 @@ class _WebkitRendererHelper(QObject):
     # Eventhandler for "loadStarted()" signal
     def _on_load_started(self):
         """Slot that sets the '__loading' property to true."""
-        logger.debug("loading started")
+        if self.logger: self.logger.debug("loading started")
         self.__loading = True
 
     # Eventhandler for "loadFinished(bool)" signal
@@ -333,7 +323,7 @@ class _WebkitRendererHelper(QObject):
         """Slot that sets the '__loading' property to false and stores
         the result code in '__loading_result'.
         """
-        logger.debug("loading finished with result %s", result)
+        if self.logger: self.logger.debug("loading finished with result %s", result)
         self.__loading = False
         self.__loading_result = result
 
@@ -341,167 +331,5 @@ class _WebkitRendererHelper(QObject):
     def _on_ssl_errors(self, reply, errors):
         """Slot that writes SSL warnings into the log but ignores them."""
         for e in errors:
-            logger.warn("SSL: " + e.errorString())
+            if self.logger: self.logger.warn("SSL: " + e.errorString())
         reply.ignoreSslErrors()
-
-
-def init_qtgui(display=None, style=None, qtargs=[]):
-    """Initiates the QApplication environment using the given args."""
-    if QApplication.instance():
-        logger.debug("QApplication has already been instantiated. \
-                        Ignoring given arguments and returning existing QApplication.")
-        return QApplication.instance()
-    
-    qtargs2 = [sys.argv[0]]
-    
-    if display:
-        qtargs2.append('-display')
-        qtargs2.append(display)
-        # Also export DISPLAY var as this may be used
-        # by flash plugin
-        os.environ["DISPLAY"] = display
-    
-    if style:
-        qtargs2.append('-style')
-        qtargs2.append(style)
-    
-    qtargs2.extend(qtargs)
-    
-    return QApplication(qtargs2)
-
-
-if __name__ == '__main__':
-    # This code will be executed if this module is run 'as-is'.
-
-    # Enable HTTP proxy
-    if 'http_proxy' in os.environ:
-        proxy_url = urlparse.urlparse(os.environ.get('http_proxy'))
-        proxy = QNetworkProxy(QNetworkProxy.HttpProxy, proxy_url.hostname, proxy_url.port)
-        QNetworkProxy.setApplicationProxy(proxy)
-    
-    # Parse command line arguments.
-    # Syntax:
-    # $0 [--xvfb|--display=DISPLAY] [--debug] [--output=FILENAME] <URL>
-
-    description = "Creates a screenshot of a website using QtWebkit." \
-                + "This program comes with ABSOLUTELY NO WARRANTY. " \
-                + "This is free software, and you are welcome to redistribute " \
-                + "it under the terms of the GNU General Public License v2."
-
-    parser = OptionParser(usage="usage: %prog [options] <URL>",
-                          version="%prog " + VERSION + ", Copyright (c) Roland Tapken",
-                          description=description, add_help_option=True)
-    parser.add_option("-x", "--xvfb", nargs=2, type="int", dest="xvfb",
-                      help="Start an 'xvfb' instance with the given desktop size.", metavar="WIDTH HEIGHT")
-    parser.add_option("-g", "--geometry", dest="geometry", nargs=2, default=(0, 0), type="int",
-                      help="Geometry of the virtual browser window (0 means 'autodetect') [default: %default].", metavar="WIDTH HEIGHT")
-    parser.add_option("-o", "--output", dest="output",
-                      help="Write output to FILE instead of STDOUT.", metavar="FILE")
-    parser.add_option("-f", "--format", dest="format", default="png",
-                      help="Output image format [default: %default]", metavar="FORMAT")
-    parser.add_option("--scale", dest="scale", nargs=2, type="int",
-                      help="Scale the image to this size", metavar="WIDTH HEIGHT")
-    parser.add_option("--aspect-ratio", dest="ratio", type="choice", choices=["ignore", "keep", "expand", "crop"],
-                      help="One of 'ignore', 'keep', 'crop' or 'expand' [default: %default]")
-    parser.add_option("-F", "--feature", dest="features", action="append", type="choice",
-                      choices=["javascript", "plugins"],
-                      help="Enable additional Webkit features ('javascript', 'plugins')", metavar="FEATURE")
-    parser.add_option("-w", "--wait", dest="wait", default=0, type="int",
-                      help="Time to wait after loading before the screenshot is taken [default: %default]", metavar="SECONDS")
-    parser.add_option("-t", "--timeout", dest="timeout", default=0, type="int",
-                      help="Time before the request will be canceled [default: %default]", metavar="SECONDS")
-    parser.add_option("-W", "--window", dest="window", action="store_true",
-                      help="Grab whole window instead of frame (may be required for plugins)", default=False)
-    parser.add_option("-T", "--transparent", dest="transparent", action="store_true",
-                      help="Render output on a transparent background (Be sure to have a transparent background defined in the html)", default=False)
-    parser.add_option("", "--style", dest="style",
-                      help="Change the Qt look and feel to STYLE (e.G. 'windows').", metavar="STYLE")
-    parser.add_option("-d", "--display", dest="display",
-                      help="Connect to X server at DISPLAY.", metavar="DISPLAY")
-    parser.add_option("--debug", action="store_true", dest="debug",
-                      help="Show debugging information.", default=False)
-    parser.add_option("--log", action="store", dest="logfile", default=LOG_FILENAME,
-                      help="Select the log output file",)
-
-    # Parse command line arguments and validate them (as far as we can)
-    (options,args) = parser.parse_args()
-    if len(args) != 1:
-        parser.error("incorrect number of arguments")
-    if options.display and options.xvfb:
-        parser.error("options -x and -d are mutually exclusive")
-    options.url = args[0]
-
-    logging.basicConfig(filename=options.logfile,level=logging.WARN,)
-
-    # Enable output of debugging information
-    if options.debug:
-        logger.setLevel(logging.DEBUG)
-
-    if options.xvfb:
-        # Start 'xvfb' instance by replacing the current process
-        server_num = int(os.getpid() + 1e6)
-        newArgs = ["xvfb-run", "--auto-servernum", "--server-num", str(server_num), "--server-args=-screen 0, %dx%dx24" % options.xvfb, sys.argv[0]]
-        skipArgs = 0
-        for i in range(1, len(sys.argv)):
-            if skipArgs > 0:
-                skipArgs -= 1
-            elif sys.argv[i] in ["-x", "--xvfb"]:
-                skipArgs = 2 # following: width and height
-            else:
-                newArgs.append(sys.argv[i])
-        logger.debug("Executing %s" % " ".join(newArgs))
-        os.execvp(newArgs[0],newArgs[1:])
-        
-    # Prepare outout ("1" means STDOUT)
-    if options.output == None:
-        options.output = sys.stdout
-    else:
-        options.output = open(options.output, "w")
-
-    logger.debug("Version %s, Python %s, Qt %s", VERSION, sys.version, qVersion());
-
-    # Technically, this is a QtGui application, because QWebPage requires it
-    # to be. But because we will have no user interaction, and rendering can
-    # not start before 'app.exec_()' is called, we have to trigger our "main"
-    # by a timer event.
-    def __main_qt():
-        # Render the page.
-        # If this method times out or loading failed, a
-        # RuntimeException is thrown
-        try:
-            # Initialize WebkitRenderer object
-            renderer = WebkitRenderer()
-            renderer.width = options.geometry[0]
-            renderer.height = options.geometry[1]
-            renderer.timeout = options.timeout
-            renderer.wait = options.wait
-            renderer.format = options.format
-            renderer.grabWholeWindow = options.window
-            renderer.renderTransparentBackground = options.transparent
-
-            if options.scale:
-                renderer.scaleRatio = options.ratio
-                renderer.scaleToWidth = options.scale[0]
-                renderer.scaleToHeight = options.scale[1]
-
-            if options.features:
-                if "javascript" in options.features:
-                    renderer.qWebSettings[QWebSettings.JavascriptEnabled] = True
-                if "plugins" in options.features:
-                    renderer.qWebSettings[QWebSettings.PluginsEnabled] = True
-
-            renderer.render_to_file(url=options.url, file=options.output)
-            options.output.close()
-            QApplication.exit(0)
-        except RuntimeError, e:
-            logger.error("main: %s" % e)
-            print >> sys.stderr, e
-            QApplication.exit(1)
-
-    # Initialize Qt-Application, but make this script
-    # abortable via CTRL-C
-    app = init_qtgui(display = options.display, style=options.style)
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
-
-    QTimer.singleShot(0, __main_qt)
-    sys.exit(app.exec_())
