@@ -196,6 +196,7 @@ class _WebkitRendererHelper(QObject):
         self.connect(self._page, SIGNAL("loadFinished(bool)"), self._on_load_finished)
         self.connect(self._page, SIGNAL("loadStarted()"), self._on_load_started)
         self.connect(self._page.networkAccessManager(), SIGNAL("sslErrors(QNetworkReply *,const QList<QSslError>&)"), self._on_ssl_errors)
+        self.connect(self._page.networkAccessManager(), SIGNAL("finished(QNetworkReply *)"), self._on_each_reply)
 
         # The way we will use this, it seems to be unesseccary to have Scrollbars enabled
         self._page.mainFrame().setScrollBarPolicy(Qt.Horizontal, Qt.ScrollBarAlwaysOff)
@@ -316,6 +317,10 @@ class _WebkitRendererHelper(QObject):
             if self.scaleRatio == 'crop':
                 qImage = qImage.copy(0, 0, self.scaleToWidth, self.scaleToHeight)
         return qImage
+
+    def _on_each_reply(self,reply):
+      """Logs each requested uri"""
+      logger.debug("Received %s" % (reply.url().toString()))
 
     # Eventhandler for "loadStarted()" signal
     def _on_load_started(self):
