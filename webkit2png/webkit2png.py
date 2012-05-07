@@ -310,7 +310,7 @@ class _WebkitRendererHelper(QObject):
 
     def _on_each_reply(self,reply):
       """Logs each requested uri"""
-      logger.debug("Received %s" % (reply.url().toString()))
+      self.logger.debug("Received %s" % (reply.url().toString()))
 
     # Eventhandler for "loadStarted()" signal
     def _on_load_started(self):
