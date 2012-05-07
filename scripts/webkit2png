@@ -147,8 +147,13 @@ if __name__ == '__main__':
             else:
                 newArgs.append(sys.argv[i])
         logger.debug("Executing %s" % " ".join(newArgs))
-        os.execvp(newArgs[0],newArgs[1:])
-        
+        try:
+            os.execvp(newArgs[0],newArgs[1:])
+        except OSError:
+            logger.error("Unable to find '%s'" % newArgs[0])
+            print >> sys.stderr, "Error - Unable to find '%s' for -x/--xvfb option" % newArgs[0]
+            sys.exit(1)
+
     # Prepare outout ("1" means STDOUT)
     if options.output == None:
         options.output = sys.stdout
