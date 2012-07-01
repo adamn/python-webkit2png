@@ -16,6 +16,10 @@ Ubuntu
 
 FreeBSD
 -------
-- install qt4 webkit: www/py-qt4-webkit, www/qt4-webkit
+- install qt4 webkit: www/py-qt4-webkit, www/qt4-webkit, devel/py-qt4
 - install pip: devel/py-pip
 - install via: pip install webkit2png
+
+Usage
+=====
+- on a headless server run: xvfb-run --server-args="-screen 0, 640x480x24" python webkit2png-simple.py
