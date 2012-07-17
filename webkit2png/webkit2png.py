@@ -217,7 +217,6 @@ class _WebkitRendererHelper(QObject):
         if self.wait > 0:
             if self.logger: self.logger.debug("Waiting %d seconds " % self.wait)
             waitToTime = time.time() + self.wait
-            # while time.time() < waitToTime and QApplication.hasPendingEvents():
             while time.time() < waitToTime and QApplication.hasPendingEvents():
                 QApplication.processEvents()
 
@@ -266,7 +265,6 @@ class _WebkitRendererHelper(QObject):
         while self.__loading:
             if timeout > 0 and time.time() >= cancelAt:
                 raise RuntimeError("Request timed out on %s" % url)
-            # while QApplication.hasPendingEvents():
             while QApplication.hasPendingEvents() and self.__loading:
                 QCoreApplication.processEvents()
 
