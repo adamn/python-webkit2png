@@ -217,14 +217,8 @@ class _WebkitRendererHelper(QObject):
         if self.wait > 0:
             if self.logger: self.logger.debug("Waiting %d seconds " % self.wait)
             waitToTime = time.time() + self.wait
-            while time.time() < waitToTime:
-                while QApplication.hasPendingEvents():
-                    QApplication.processEvents()
-
-        # Paint this frame into an image
-        #self._window.repaint()
-        while QApplication.hasPendingEvents():
-            QApplication.processEvents()
+            while time.time() < waitToTime and QApplication.hasPendingEvents():
+                QApplication.processEvents()
 
         if self.renderTransparentBackground:
             # Another possible drawing solution
@@ -251,7 +245,6 @@ class _WebkitRendererHelper(QObject):
             else:
                 image = QPixmap.grabWidget(self._window)
         
-
         return self._post_process_image(image)
 
     def _load_page(self, url, width, height, timeout):
@@ -272,7 +265,7 @@ class _WebkitRendererHelper(QObject):
         while self.__loading:
             if timeout > 0 and time.time() >= cancelAt:
                 raise RuntimeError("Request timed out on %s" % url)
-            while QApplication.hasPendingEvents():
+            while QApplication.hasPendingEvents() and self.__loading:
                 QCoreApplication.processEvents()
 
         if self.logger: self.logger.debug("Processing result")
