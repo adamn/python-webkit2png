@@ -62,7 +62,7 @@ sys.exit(app.exec_())
                 QApplication.quit()
                 return
             do_something_meaningful()
- 
+
         app = init_qtgui()
         main_timer = QTimer()
         QObject.connect(main_timer, QtCore.SIGNAL("timeout()"), qt_main_loop)
@@ -108,9 +108,13 @@ sys.exit(app.exec_())
         # Set this to true if you want to capture flash.
         # Not that your desktop must be large enough for
         # fitting the whole window.
-        self.grabWholeWindow = kwargs.get('grabWholeWindow', False) 
+        self.grabWholeWindow = kwargs.get('grabWholeWindow', False)
         self.renderTransparentBackground = kwargs.get('renderTransparentBackground', False)
-        
+        self.ignoreAlert = kwargs.get('ignoreAlert', True)
+        self.ignoreConfirm = kwargs.get('ignoreConfirm', True)
+        self.ignorePrompt = kwargs.get('ignorePrompt', True)
+        self.interruptJavaScript = kwargs.get('interruptJavaScript', True)
+
         # Set some default options for QWebPage
         self.qWebSettings = {
             QWebSettings.JavascriptEnabled : False,
@@ -155,7 +159,7 @@ sys.exit(app.exec_())
         return qBuffer.buffer().data()
 
 class _WebkitRendererHelper(QObject):
-    """This helper class is doing the real work. It is required to 
+    """This helper class is doing the real work. It is required to
     allow WebkitRenderer.render() to be called "asynchronously"
     (but always from Qt's GUI thread).
     """
@@ -172,7 +176,9 @@ class _WebkitRendererHelper(QObject):
             setattr(self,key,value)
 
         # Create and connect required PyQt4 objects
-        self._page = QWebPage()
+        self._page = CustomWebPage(logger=self.logger, ignore_alert=self.ignoreAlert,
+            ignore_confirm=self.ignoreConfirm, ignore_prompt=self.ignorePrompt,
+            interrupt_js=self.interruptJavaScript)
         self._view = QWebView()
         self._view.setPage(self._page)
         self._window = QMainWindow()
@@ -244,12 +250,12 @@ class _WebkitRendererHelper(QObject):
                 image = QPixmap.grabWindow(self._window.winId())
             else:
                 image = QPixmap.grabWidget(self._window)
-        
+
         return self._post_process_image(image)
 
     def _load_page(self, url, width, height, timeout):
         """
-        This method implements the logic for retrieving and displaying 
+        This method implements the logic for retrieving and displaying
         the requested page.
         """
 
@@ -326,3 +332,48 @@ class _WebkitRendererHelper(QObject):
         for e in errors:
             if self.logger: self.logger.warn("SSL: " + e.errorString())
         reply.ignoreSslErrors()
+
+
+class CustomWebPage(QWebPage):
+    def __init__(self, **kwargs):
+        super(CustomWebPage, self).__init__()
+        self.logger = kwargs.get('logger', None)
+        self.ignore_alert = kwargs.get('ignore_alert', True)
+        self.ignore_confirm = kwargs.get('ignore_confirm', True)
+        self.ignore_prompt = kwargs.get('ignore_prompt', True)
+        self.interrupt_js = kwargs.get('interrupt_js', True)
+
+    def javaScriptAlert(self, frame, message):
+        if self.logger: self.logger.debug('Alert: %s', message)
+        if not self.ignore_alert:
+            return super(CustomWebPage, self).javaScriptAlert(frame, message)
+
+    def javaScriptConfirm(self, frame, message):
+        if self.logger: self.logger.debug('Confirm: %s', message)
+        if not self.ignore_confirm:
+            return super(CustomWebPage, self).javaScriptConfirm(frame, message)
+        else:
+            False
+
+    def javaScriptPrompt(self, frame, message, default, result):
+        """This function is called whenever a JavaScript program running inside frame tries to prompt
+        the user for input. The program may provide an optional message, msg, as well as a default value
+        for the input in defaultValue.
+
+        If the prompt was cancelled by the user the implementation should return false;
+        otherwise the result should be written to result and true should be returned.
+        If the prompt was not cancelled by the user, the implementation should return true and
+        the result string must not be null.
+        """
+        if self.logger: self.logger.debug('Prompt: %s (%s)' % (message, default))
+        if not self.ignore_prompt:
+            return super(CustomWebPage, self).javaScriptPrompt(frame, message, default, result)
+        else:
+            return False
+
+    def shouldInterruptJavaScript(self):
+        """This function is called when a JavaScript program is running for a long period of time.
+        If the user wanted to stop the JavaScript the implementation should return true; otherwise false.
+        """
+        if self.logger: self.log.debug("WebKit ask to interrupt JavaScript")
+        return self.interrupt_js
