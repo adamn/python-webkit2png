@@ -42,28 +42,28 @@ VERSION="20091224"
 LOG_FILENAME = 'webkit2png.log'
 logger = logging.getLogger('webkit2png');
 
-def init_qtgui(display=None, style=None, qtargs=[]):
+def init_qtgui(display=None, style=None, qtargs=None):
     """Initiates the QApplication environment using the given args."""
     if QApplication.instance():
         logger.debug("QApplication has already been instantiated. \
                         Ignoring given arguments and returning existing QApplication.")
         return QApplication.instance()
-    
+
     qtargs2 = [sys.argv[0]]
-    
+
     if display:
         qtargs2.append('-display')
         qtargs2.append(display)
         # Also export DISPLAY var as this may be used
         # by flash plugin
         os.environ["DISPLAY"] = display
-    
+
     if style:
         qtargs2.append('-style')
         qtargs2.append(style)
-    
-    qtargs2.extend(qtargs)
-    
+
+    qtargs2.extend(qtargs or [])
+
     return QApplication(qtargs2)
 
 
@@ -75,7 +75,7 @@ if __name__ == '__main__':
         proxy_url = urlparse.urlparse(os.environ.get('http_proxy'))
         proxy = QNetworkProxy(QNetworkProxy.HttpProxy, proxy_url.hostname, proxy_url.port)
         QNetworkProxy.setApplicationProxy(proxy)
-    
+
     # Parse command line arguments.
     # Syntax:
     # $0 [--xvfb|--display=DISPLAY] [--debug] [--output=FILENAME] <URL>
@@ -113,6 +113,8 @@ if __name__ == '__main__':
                       help="Render output on a transparent background (Be sure to have a transparent background defined in the html)", default=False)
     parser.add_option("", "--style", dest="style",
                       help="Change the Qt look and feel to STYLE (e.G. 'windows').", metavar="STYLE")
+    parser.add_option("", "--encoded-url", dest="encoded_url", action="store_true",
+        help="Treat URL as url-encoded", metavar="ENCODED_URL", default=False)
     parser.add_option("-d", "--display", dest="display",
                       help="Connect to X server at DISPLAY.", metavar="DISPLAY")
     parser.add_option("--debug", action="store_true", dest="debug",
@@ -154,8 +156,8 @@ if __name__ == '__main__':
             print >> sys.stderr, "Error - Unable to find '%s' for -x/--xvfb option" % newArgs[0]
             sys.exit(1)
 
-    # Prepare outout ("1" means STDOUT)
-    if options.output == None:
+    # Prepare output ("1" means STDOUT)
+    if options.output is None:
         options.output = sys.stdout
     else:
         options.output = open(options.output, "w")
@@ -181,6 +183,7 @@ if __name__ == '__main__':
             renderer.format = options.format
             renderer.grabWholeWindow = options.window
             renderer.renderTransparentBackground = options.transparent
+            renderer.encodedUrl = options.encoded_url
 
             if options.scale:
                 renderer.scaleRatio = options.ratio
