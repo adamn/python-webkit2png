@@ -114,6 +114,7 @@ sys.exit(app.exec_())
         self.ignoreConfirm = kwargs.get('ignoreConfirm', True)
         self.ignorePrompt = kwargs.get('ignorePrompt', True)
         self.interruptJavaScript = kwargs.get('interruptJavaScript', True)
+        self.encodedUrl = kwargs.get('encodedUrl', False)
 
         # Set some default options for QWebPage
         self.qWebSettings = {
@@ -264,10 +265,10 @@ class _WebkitRendererHelper(QObject):
         cancelAt = time.time() + timeout
         self.__loading = True
         self.__loadingResult = False # Default
-        # TODO: fromEncoded() needs to be used in some situations.  Some
-        # sort of flag should be passed in to WebkitRenderer maybe?
-        #self._page.mainFrame().load(QUrl.fromEncoded(url))
-        self._page.mainFrame().load(QUrl(url))
+        if self.encodedUrl:
+            self._page.mainFrame().load(QUrl.fromEncoded(url))
+        else:
+            self._page.mainFrame().load(QUrl(url))
         while self.__loading:
             if timeout > 0 and time.time() >= cancelAt:
                 raise RuntimeError("Request timed out on %s" % url)
