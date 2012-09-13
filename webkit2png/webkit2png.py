@@ -353,7 +353,7 @@ class CustomWebPage(QWebPage):
         if not self.ignore_confirm:
             return super(CustomWebPage, self).javaScriptConfirm(frame, message)
         else:
-            False
+            return False
 
     def javaScriptPrompt(self, frame, message, default, result):
         """This function is called whenever a JavaScript program running inside frame tries to prompt
