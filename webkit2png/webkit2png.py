@@ -376,5 +376,5 @@ class CustomWebPage(QWebPage):
         """This function is called when a JavaScript program is running for a long period of time.
         If the user wanted to stop the JavaScript the implementation should return true; otherwise false.
         """
-        if self.logger: self.log.debug("WebKit ask to interrupt JavaScript")
+        if self.logger: self.logger.debug("WebKit ask to interrupt JavaScript")
         return self.interrupt_js
