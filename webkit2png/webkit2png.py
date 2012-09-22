@@ -131,6 +131,7 @@ sys.exit(app.exec_())
         # QApplication.processEvents may be called, causing
         # this method to get called while it has not returned yet.
         helper = _WebkitRendererHelper(self)
+        helper._window.resize( self.width, self.height )
         image = helper.render(url)
 
         # Bind helper instance to this image to prevent the
@@ -224,8 +225,9 @@ class _WebkitRendererHelper(QObject):
         if self.wait > 0:
             if self.logger: self.logger.debug("Waiting %d seconds " % self.wait)
             waitToTime = time.time() + self.wait
-            while time.time() < waitToTime and QApplication.hasPendingEvents():
-                QApplication.processEvents()
+            while time.time() < waitToTime:
+                if QApplication.hasPendingEvents():
+                    QApplication.processEvents()
 
         if self.renderTransparentBackground:
             # Another possible drawing solution
