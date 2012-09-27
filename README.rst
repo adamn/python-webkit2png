@@ -11,8 +11,20 @@ Installation
 
 Ubuntu
 ------
-- On ubuntu you need to add following packages: apt-get install python-qt4 libqt4-webkit 
-- And then install it with: pip install webkit2png
+- Add following packages: apt-get install python-qt4 libqt4-webkit xfvb
+- Install the flash plugin to screenshot Adobe Flash files: apt-get install flashplugin-installer
+
+Automated installation via pip
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Install pip: apt-get install python-pip
+- Install webkit2png: pip install webkit2png
+
+Manual installation via Git
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Install git: apt-get install git-core
+- Create directory: mkdir python-webkit2png
+- Clone the project: git clone https://github.com/adamn/python-webkit2png.git python-webkit2png
+- Install with: python python-webkit2png/setup.py install
 
 FreeBSD
 -------
@@ -22,4 +34,5 @@ FreeBSD
 
 Usage
 =====
-- on a headless server run: xvfb-run --server-args="-screen 0, 640x480x24" python webkit2png-simple.py
+- On a headless server run: python scripts/webkit2png [options] <URL>
+- For help run: python scripts/webkit2png -h
