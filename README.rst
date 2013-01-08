@@ -11,7 +11,7 @@ Installation
 
 Ubuntu
 ------
-- Add following packages: apt-get install python-qt4 libqt4-webkit xfvb
+- Add following packages: apt-get install python-qt4 libqt4-webkit xvfb
 - Install the flash plugin to screenshot Adobe Flash files: apt-get install flashplugin-installer
 
 Automated installation via pip
