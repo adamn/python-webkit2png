@@ -115,6 +115,7 @@ sys.exit(app.exec_())
         self.ignorePrompt = kwargs.get('ignorePrompt', True)
         self.interruptJavaScript = kwargs.get('interruptJavaScript', True)
         self.encodedUrl = kwargs.get('encodedUrl', False)
+        self.cookies = kwargs.get('cookies', [])
 
         # Set some default options for QWebPage
         self.qWebSettings = {
@@ -159,6 +160,19 @@ sys.exit(app.exec_())
         qBuffer = QBuffer()
         image.save(qBuffer, format)
         return qBuffer.buffer().data()
+
+## @brief The CookieJar class inherits QNetworkCookieJar to make a couple of functions public.
+class CookieJar(QNetworkCookieJar):
+	def __init__(self, cookies, qtUrl, parent=None):
+		QNetworkCookieJar.__init__(self, parent)
+		for cookie in cookies:
+			QNetworkCookieJar.setCookiesFromUrl(self, QNetworkCookie.parseCookies(QByteArray(cookie)), qtUrl)
+
+	def allCookies(self):
+		return QNetworkCookieJar.allCookies(self)
+	
+	def setAllCookies(self, cookieList):
+		QNetworkCookieJar.setAllCookies(self, cookieList)
 
 class _WebkitRendererHelper(QObject):
     """This helper class is doing the real work. It is required to
@@ -268,9 +282,14 @@ class _WebkitRendererHelper(QObject):
         self.__loading = True
         self.__loadingResult = False # Default
         if self.encodedUrl:
-            self._page.mainFrame().load(QUrl.fromEncoded(url))
+            qtUrl = QUrl.fromEncoded(url)
         else:
-            self._page.mainFrame().load(QUrl(url))
+            qtUrl = QUrl(url)
+        # Set the required cookies, if any
+        self.cookieJar = CookieJar(self.cookies, qtUrl)
+        self._page.networkAccessManager().setCookieJar( self.cookieJar )
+        # Load the page
+        self._page.mainFrame().load(qtUrl)
         while self.__loading:
             if timeout > 0 and time.time() >= cancelAt:
                 raise RuntimeError("Request timed out on %s" % url)
