@@ -1,6 +1,5 @@
 About
 =====
-***This project is looking for a maintainer - Please contact me if you're interested***
 
 
 Originally taken from the blog post by Roland Tapken at:
