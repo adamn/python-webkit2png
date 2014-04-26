@@ -1,9 +1,9 @@
-python-webkit2png
+**python-webkit2png**
 -----------------------
 
 Creates screenshots of webpages using by QtWebkit.
 
-Copyright (c) 2008 Roland Tapken <roland@dau-sicher.de>
+Copyright (c) 2014 Roland Tapken <roland@dau-sicher.de>
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
