@@ -3,7 +3,7 @@
 #
 # Creates screenshots of webpages using by QtWebkit.
 #
-# Copyright (c) 2008 Roland Tapken <roland@dau-sicher.de>
+# Copyright (c) 2014 Roland Tapken <roland@dau-sicher.de>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -33,63 +33,18 @@ from PyQt4.QtNetwork import *
 # Class for Website-Rendering. Uses QWebPage, which
 # requires a running QtGui to work.
 class WebkitRenderer(QObject):
-    """A class that helps to create 'screenshots' of webpages using
+    """
+    A class that helps to create 'screenshots' of webpages using
     Qt's QWebkit. Requires PyQt4 library.
 
     Use "render()" to get a 'QImage' object, render_to_bytes() to get the
     resulting image as 'str' object or render_to_file() to write the image
     directly into a 'file' resource.
-
-    These methods have to be called from within Qt's main (GUI) thread.
-    An example on how to use this is the __qt_main() method at the end
-    of the libraries source file. More generic examples:
-
-def qt_main():
-    while go_on():
-        do_something_meaningful()
-        while QApplication.hasPendingEvents():
-             QApplication.processEvents()
-    QApplication.quit()
-
-app = init_qtgui()
-QTimer.singleShot(0, qt_main)
-sys.exit(app.exec_())
-
-    Or let Qt handle event processing using a QTimer instance:
-
-        def qt_main_loop():
-            if not go_on():
-                QApplication.quit()
-                return
-            do_something_meaningful()
-
-        app = init_qtgui()
-        main_timer = QTimer()
-        QObject.connect(main_timer, QtCore.SIGNAL("timeout()"), qt_main_loop)
-        sys.exit(app.exec_())
-
-    Avaible properties:
-    width -- The width of the "browser" window. 0 means autodetect (default).
-    height -- The height of the window. 0 means autodetect (default).
-    timeout -- Seconds after that the request is aborted (default: 0)
-    wait -- Seconds to wait after loading has been finished (default: 0)
-    scaleToWidth -- The resulting image is scaled to this width.
-    scaleToHeight -- The resulting image is scaled to this height.
-    scaleRatio -- The image is scaled using this method. Possible values are:
-      keep
-      expand
-      crop
-      ignore
-    grabWhileWindow -- If this is True a screenshot of the whole window is taken. Otherwise only the current frame is rendered. This is required for plugins to be visible, but it is possible that another window overlays the current one while the screenshot is taken. To reduce this possibility, the window is activated just before it is rendered if this property is set to True (default: False).
-    qWebSettings -- Settings that should be assigned to the created QWebPage instance. See http://doc.trolltech.com/4.6/qwebsettings.html for possible keys. Defaults:
-      JavascriptEnabled: False
-      PluginsEnabled: False
-      PrivateBrowsingEnabled: True
-      JavascriptCanOpenWindows: False
     """
-
     def __init__(self,**kwargs):
-        """Sets default values for the properties."""
+        """
+        Sets default values for the properties.
+        """
 
         if not QApplication.instance():
             raise RuntimeError(self.__class__.__name__ + " requires a running QApplication instance")
@@ -105,6 +60,7 @@ sys.exit(app.exec_())
         self.scaleRatio = kwargs.get('scaleRatio', 'keep')
         self.format = kwargs.get('format', 'png')
         self.logger = kwargs.get('logger', None)
+        
         # Set this to true if you want to capture flash.
         # Not that your desktop must be large enough for
         # fitting the whole window.
@@ -127,7 +83,9 @@ sys.exit(app.exec_())
 
 
     def render(self, url):
-        """Renders the given URL into a QImage object"""
+        """
+        Renders the given URL into a QImage object
+        """
         # We have to use this helper object because
         # QApplication.processEvents may be called, causing
         # this method to get called while it has not returned yet.
@@ -143,7 +101,8 @@ sys.exit(app.exec_())
         return image
 
     def render_to_file(self, url, file_object):
-        """Renders the image into a File resource.
+        """
+        Renders the image into a File resource.
         Returns the size of the data that has been written.
         """
         format = self.format # this may not be constant due to processEvents()
@@ -175,13 +134,15 @@ class CookieJar(QNetworkCookieJar):
 		QNetworkCookieJar.setAllCookies(self, cookieList)
 
 class _WebkitRendererHelper(QObject):
-    """This helper class is doing the real work. It is required to
+    """
+    This helper class is doing the real work. It is required to
     allow WebkitRenderer.render() to be called "asynchronously"
     (but always from Qt's GUI thread).
     """
 
     def __init__(self, parent):
-        """Copies the properties from the parent (WebkitRenderer) object,
+        """
+        Copies the properties from the parent (WebkitRenderer) object,
         creates the required instances of QWebPage, QWebView and QMainWindow
         and registers some Slots.
         """
@@ -219,14 +180,17 @@ class _WebkitRendererHelper(QObject):
         self._window.show()
 
     def __del__(self):
-        """Clean up Qt4 objects. """
+        """
+        Clean up Qt4 objects.
+        """
         self._window.close()
         del self._window
         del self._view
         del self._page
 
     def render(self, url):
-        """The real worker. Loads the page (_load_page) and awaits
+        """
+        The real worker. Loads the page (_load_page) and awaits
         the end of the given 'delay'. While it is waiting outstanding
         QApplication events are processed.
         After the given delay, the Window or Widget (depends
@@ -312,7 +276,8 @@ class _WebkitRendererHelper(QObject):
         self._window.resize(size)
 
     def _post_process_image(self, qImage):
-        """If 'scaleToWidth' or 'scaleToHeight' are set to a value
+        """
+        If 'scaleToWidth' or 'scaleToHeight' are set to a value
         greater than zero this method will scale the image
         using the method defined in 'scaleRatio'.
         """
@@ -330,12 +295,16 @@ class _WebkitRendererHelper(QObject):
         return qImage
 
     def _on_each_reply(self,reply):
-      """Logs each requested uri"""
+      """
+      Logs each requested uri
+      """
       self.logger.debug("Received %s" % (reply.url().toString()))
 
     # Eventhandler for "loadStarted()" signal
     def _on_load_started(self):
-        """Slot that sets the '__loading' property to true."""
+        """
+        Slot that sets the '__loading' property to true
+        """
         if self.logger: self.logger.debug("loading started")
         self.__loading = True
 
@@ -350,7 +319,9 @@ class _WebkitRendererHelper(QObject):
 
     # Eventhandler for "sslErrors(QNetworkReply *,const QList<QSslError>&)" signal
     def _on_ssl_errors(self, reply, errors):
-        """Slot that writes SSL warnings into the log but ignores them."""
+        """
+        Slot that writes SSL warnings into the log but ignores them.
+        """
         for e in errors:
             if self.logger: self.logger.warn("SSL: " + e.errorString())
         reply.ignoreSslErrors()
@@ -358,6 +329,9 @@ class _WebkitRendererHelper(QObject):
 
 class CustomWebPage(QWebPage):
     def __init__(self, **kwargs):
+    	"""
+    	Class Initializer
+    	"""
         super(CustomWebPage, self).__init__()
         self.logger = kwargs.get('logger', None)
         self.ignore_alert = kwargs.get('ignore_alert', True)
@@ -378,7 +352,8 @@ class CustomWebPage(QWebPage):
             return False
 
     def javaScriptPrompt(self, frame, message, default, result):
-        """This function is called whenever a JavaScript program running inside frame tries to prompt
+        """
+        This function is called whenever a JavaScript program running inside frame tries to prompt
         the user for input. The program may provide an optional message, msg, as well as a default value
         for the input in defaultValue.
 
@@ -394,7 +369,8 @@ class CustomWebPage(QWebPage):
             return False
 
     def shouldInterruptJavaScript(self):
-        """This function is called when a JavaScript program is running for a long period of time.
+        """
+        This function is called when a JavaScript program is running for a long period of time.
         If the user wanted to stop the JavaScript the implementation should return true; otherwise false.
         """
         if self.logger: self.logger.debug("WebKit ask to interrupt JavaScript")
