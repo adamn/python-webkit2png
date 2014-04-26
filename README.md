@@ -35,5 +35,3 @@ Usage
 =====
 - On a headless server run: python scripts/webkit2png [options] <URL>
 - For help run: ``python scripts/webkit2png -h``
-
-![Alt Text](http://24.media.tumblr.com/tumblr_m9trixXFHn1rxlmf0o1_400.gif)
