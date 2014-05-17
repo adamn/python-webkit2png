@@ -1,7 +1,6 @@
 **webkit2png** 
 ==============
 
-
 About
 ------
 Python script that takes screenshots (browsershots) using webkit
