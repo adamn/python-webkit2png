@@ -15,6 +15,8 @@ setup(
     author = 'Roland Tapken',
     author_email = 'roland at dau-sicher de',
     packages = ['webkit2png'],
+    zip_safe=False,
+    include_package_data=True,
     package_dir = [],
     classifiers=[
         'Development Status :: 4 - Beta',
