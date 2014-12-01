@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_packages
 
-version = '0.8.2'
+version = '0.8.3'
 
 description = "Takes snapshot of webpages using Webkit and Qt4"
 long_description = description
