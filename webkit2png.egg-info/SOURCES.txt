@@ -1,8 +1,0 @@
-setup.py
-scripts/webkit2png
-webkit2png/__init__.py
-webkit2png/webkit2png.py
-webkit2png.egg-info/PKG-INFO
-webkit2png.egg-info/SOURCES.txt
-webkit2png.egg-info/dependency_links.txt
-webkit2png.egg-info/top_level.txt
