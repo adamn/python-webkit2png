@@ -82,7 +82,7 @@ class WebkitRenderer(QObject):
         }
 
 
-    def render(self, url):
+    def render(self, res):
         """
         Renders the given URL into a QImage object
         """
@@ -91,7 +91,7 @@ class WebkitRenderer(QObject):
         # this method to get called while it has not returned yet.
         helper = _WebkitRendererHelper(self)
         helper._window.resize( self.width, self.height )
-        image = helper.render(url)
+        image = helper.render(res)
 
         # Bind helper instance to this image to prevent the
         # object from being cleaned up (and with it the QWebPage, etc)
@@ -100,22 +100,22 @@ class WebkitRenderer(QObject):
 
         return image
 
-    def render_to_file(self, url, file_object):
+    def render_to_file(self, res, file_object):
         """
         Renders the image into a File resource.
         Returns the size of the data that has been written.
         """
         format = self.format # this may not be constant due to processEvents()
-        image = self.render(url)
+        image = self.render(res)
         qBuffer = QBuffer()
         image.save(qBuffer, format)
         file_object.write(qBuffer.buffer().data())
         return qBuffer.size()
 
-    def render_to_bytes(self, url):
+    def render_to_bytes(self, res):
         """Renders the image into an object of type 'str'"""
         format = self.format # this may not be constant due to processEvents()
-        image = self.render(url)
+        image = self.render(res)
         qBuffer = QBuffer()
         image.save(qBuffer, format)
         return qBuffer.buffer().data()
@@ -188,7 +188,7 @@ class _WebkitRendererHelper(QObject):
         del self._view
         del self._page
 
-    def render(self, url):
+    def render(self, res):
         """
         The real worker. Loads the page (_load_page) and awaits
         the end of the given 'delay'. While it is waiting outstanding
@@ -197,7 +197,7 @@ class _WebkitRendererHelper(QObject):
         on the value of 'grabWholeWindow' is drawn into a QPixmap
         and postprocessed (_post_process_image).
         """
-        self._load_page(url, self.width, self.height, self.timeout)
+        self._load_page(res, self.width, self.height, self.timeout)
         # Wait for end of timer. In this time, process
         # other outstanding Qt events.
         if self.wait > 0:
@@ -234,7 +234,7 @@ class _WebkitRendererHelper(QObject):
 
         return self._post_process_image(image)
 
-    def _load_page(self, url, width, height, timeout):
+    def _load_page(self, res, width, height, timeout):
         """
         This method implements the logic for retrieving and displaying
         the requested page.
@@ -245,25 +245,42 @@ class _WebkitRendererHelper(QObject):
         cancelAt = time.time() + timeout
         self.__loading = True
         self.__loadingResult = False # Default
+
+        # When "res" is of type tuple, it has two elements where the first
+        # element is the HTML code to render and the second element is a string
+        # setting the base URL for the interpreted HTML code.
+        # When resource is of type str or unicode, it is handled as URL which
+        # shal be loaded
+        if type(res) == tuple:
+            url = res[1]
+        else:
+            url = res
+
         if self.encodedUrl:
             qtUrl = QUrl.fromEncoded(url)
         else:
             qtUrl = QUrl(url)
+
         # Set the required cookies, if any
         self.cookieJar = CookieJar(self.cookies, qtUrl)
-        self._page.networkAccessManager().setCookieJar( self.cookieJar )
+        self._page.networkAccessManager().setCookieJar(self.cookieJar)
+
         # Load the page
-        self._page.mainFrame().load(qtUrl)
+        if type(res) == tuple:
+            self._page.mainFrame().setHtml(res[0], qtUrl) # HTML, baseUrl
+        else:
+            self._page.mainFrame().load(qtUrl)
+
         while self.__loading:
             if timeout > 0 and time.time() >= cancelAt:
-                raise RuntimeError("Request timed out on %s" % url)
+                raise RuntimeError("Request timed out on %s" % res)
             while QApplication.hasPendingEvents() and self.__loading:
                 QCoreApplication.processEvents()
 
         if self.logger: self.logger.debug("Processing result")
 
         if self.__loading_result == False:
-            if self.logger: self.logger.warning("Failed to load %s" % url)
+            if self.logger: self.logger.warning("Failed to load %s" % res)
 
         # Set initial viewport (the size of the "window")
         size = self._page.mainFrame().contentsSize()
