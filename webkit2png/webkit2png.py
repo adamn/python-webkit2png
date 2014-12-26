@@ -257,9 +257,9 @@ class _WebkitRendererHelper(QObject):
             url = res
 
         if self.encodedUrl:
-            qtUrl = QUrl.fromEncoded(res)
+            qtUrl = QUrl.fromEncoded(url)
         else:
-            qtUrl = QUrl(res)
+            qtUrl = QUrl(url)
 
         # Set the required cookies, if any
         self.cookieJar = CookieJar(self.cookies, qtUrl)
@@ -267,7 +267,7 @@ class _WebkitRendererHelper(QObject):
 
         # Load the page
         if type(res) == tuple:
-            self._page.mainFrame().setHtml(res[0], res[1]) # HTML, baseUrl
+            self._page.mainFrame().setHtml(res[0], qtUrl) # HTML, baseUrl
         else:
             self._page.mainFrame().load(qtUrl)
 
