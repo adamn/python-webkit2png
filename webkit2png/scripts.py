@@ -200,7 +200,7 @@ def main():
                 if "plugins" in options.features:
                     renderer.qWebSettings[QWebSettings.PluginsEnabled] = True
 
-            renderer.render_to_file(url=options.url, file_object=options.output)
+            renderer.render_to_file(res=options.url, file_object=options.output)
             options.output.close()
             QApplication.exit(0)
         except RuntimeError, e:
