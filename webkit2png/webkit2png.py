@@ -152,10 +152,28 @@ class _WebkitRendererHelper(QObject):
         for key,value in parent.__dict__.items():
             setattr(self,key,value)
 
+        # Determine Proxy settings
+        proxy = QNetworkProxy(QNetworkProxy.NoProxy)
+        if 'http_proxy' in os.environ:
+            proxy_url = QUrl(os.environ['http_proxy'])
+            if unicode(proxy_url.scheme()).startswith('http'):
+                protocol = QNetworkProxy.HttpProxy
+            else:
+                protocol = QNetworkProxy.Socks5Proxy
+
+            proxy = QNetworkProxy(
+                protocol,
+                proxy_url.host(),
+                proxy_url.port(),
+                proxy_url.userName(),
+                proxy_url.password()
+            )
+
         # Create and connect required PyQt4 objects
         self._page = CustomWebPage(logger=self.logger, ignore_alert=self.ignoreAlert,
             ignore_confirm=self.ignoreConfirm, ignore_prompt=self.ignorePrompt,
             interrupt_js=self.interruptJavaScript)
+        self._page.networkAccessManager().setProxy(proxy)
         self._view = QWebView()
         self._view.setPage(self._page)
         self._window = QMainWindow()
